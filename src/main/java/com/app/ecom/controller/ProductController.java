@@ -21,13 +21,12 @@ public class ProductController {
 
     @PostMapping
     public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest productrequest){
-
-        return new ResponseEntity<ProductResponse>(productService.createProduct(productrequest) , HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(productService.createProduct(productrequest));
     }
 
     @PutMapping("{id}")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id , @RequestBody ProductRequest productrequest){
-        return productService.updateProduct(id , productrequest).map(ResponseEntity::ok).orElse(ResponseEntity.notFound().build());
+        return productService.updateProduct(id , productrequest).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping

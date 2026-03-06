@@ -17,11 +17,12 @@ public class OrderController {
     private final OrderService orderservice;
 
     @PostMapping
-    public ResponseEntity<OrderResponse> createOrder(@RequestHeader("X-User-Id") String userId){
+    public ResponseEntity<OrderResponse> createOrder(@RequestHeader("X-User-Id") Long userId){
 
-       return orderservice.createOrder(userId)
-               .map(orderResponse -> new ResponseEntity<>(orderResponse, HttpStatus.CREATED))
-                               .orElseGet(() -> ResponseEntity.badRequest().build());
+        OrderResponse orderResponse = orderservice.createOrder(userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(orderResponse);
+
+
 
     }
 }

@@ -4,6 +4,7 @@ import com.app.ecom.dto.OrderResponse;
 import com.app.ecom.model.*;
 import com.app.ecom.repository.OrderRepository;
 import com.app.ecom.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -13,28 +14,25 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class OrderService {
 
     private final UserRepository userRepository;
     private final CartService cartService;
     private final OrderRepository orderRepository;
-    public Optional<OrderResponse> createOrder(String userId){
+    public OrderResponse createOrder(Long userId){
 
+        //Fetch the user once
+        User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User Not Found"));
         //validation for cart items
-        List<CartItem> cartItems = cartService.getCartItems(userId);
+        List<CartItem> cartItems = cartService.getCartItems(user);
         if(cartItems.isEmpty()){
-            return Optional.empty();
+            throw new RuntimeException("Cart Item is Empty");
         }
-        Optional<User> userOptional = userRepository.findById(Long.valueOf(userId));
-        if(userOptional.isEmpty()){
-                return Optional.empty();
-        }
-        User user = userOptional.get();
-
-        BigDecimal totalPrice = cartItems.stream().map(cartItem -> cartItem.getPrice())
+      //  User user = userOptional.get();
+        BigDecimal totalPrice = cartItems.stream().map(CartItem::getPrice)
                                         .reduce(BigDecimal.ZERO, BigDecimal::add);
-
         //create order
         Order order = new Order();
         order.setUser(user);
@@ -48,10 +46,11 @@ public class OrderService {
                         item.getPrice(),
                         order
                 )).toList();
+
         order.setItems(orderItems);
         Order savedOrder = orderRepository.save(order);
         cartService.clearCart(userId);
-        return Optional.of(mapToOrderResponse(savedOrder));
+        return mapToOrderResponse(savedOrder);
     }
 
 
@@ -70,4 +69,60 @@ public class OrderService {
                 order.getOrderDate()
         );
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
